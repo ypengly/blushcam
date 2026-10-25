@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens (RGB triplets so Tailwind opacity modifiers work). Change here to re-theme the whole app. */
+:root {
+  --c-blush: 248 187 208;   /* #F8BBD0 */
+  --c-soft: 252 228 236;    /* #FCE4EC */
+  --c-cream: 255 249 243;   /* #FFF9F3 */
+  --c-rose: 217 108 147;    /* #D96C93 */
+  --c-lavender: 233 221 251;/* #E9DDFB */
+  --c-mint: 221 245 232;    /* #DDF5E8 */
+  --c-ink: 53 43 53;        /* #352B35 */
+  --c-muted: 132 119 132;   /* #847784 */
+  --c-surface: 255 255 255; /* #FFFFFF */
+  --font-sans: 'Quicksand', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-hand: 'Caveat', cursive;
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  --c-blush: 120 70 92; --c-soft: 52 40 52; --c-cream: 30 24 32; --c-rose: 240 140 175; --c-lavender: 62 52 86; --c-mint: 40 66 56;
+  --c-ink: 250 240 246; --c-muted: 190 176 190; --c-surface: 44 35 46;
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+body { @apply bg-cream font-sans text-ink antialiased; min-height: 100dvh; }
+:focus-visible { outline: 3px solid rgb(var(--c-rose)); outline-offset: 2px; border-radius: 0.5rem; }
+.sr-only-focusable:not(:focus):not(:focus-within) { @apply sr-only; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-rose text-white shadow-soft hover:brightness-105; }
+  .btn-soft { @apply btn bg-soft text-ink hover:bg-blush/60; }
+  .btn-ghost { @apply btn text-ink hover:bg-soft; }
+  .card { @apply rounded-xl2 border border-blush/50 bg-surface p-5 shadow-card; }
+  .chip { @apply inline-flex items-center rounded-full border border-blush/60 bg-surface px-3 py-1 text-xs font-semibold text-muted transition hover:border-rose; }
+  .chip[aria-pressed='true'], .chip[aria-selected='true'] { @apply border-rose bg-rose text-white; }
+  .input { @apply w-full rounded-xl border border-blush/70 bg-surface px-3 py-2 text-sm outline-none focus:border-rose; }
+  .label { @apply mb-1 block text-xs font-semibold text-muted; }
+  .range { @apply h-2 w-full cursor-pointer appearance-none rounded-full bg-blush/60 accent-rose; }
+}
+
+@keyframes float { 0%,100% { transform: translateY(0) rotate(var(--r,0deg)); } 50% { transform: translateY(-10px) rotate(var(--r,0deg)); } }
+@keyframes pop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+.float { animation: float 6s ease-in-out infinite; }
+.pop { animation: pop .25s ease-out both; }
+.flash { animation: flash .35s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+.touch-none-canvas { touch-action: none; }

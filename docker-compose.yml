@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-blushcam}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-blushcam}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports: ["5432:5432"]
+
+  image-service:
+    build: ./image-service
+    env_file: .env
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: ./backend
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-blushcam}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-blushcam}?sslmode=disable
+      IMAGE_SERVICE_URL: http://image-service:8000
+      LOCAL_STORAGE_DIR: /data
+    volumes: [assets:/data]
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["8080:8080"]
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    env_file: .env
+    environment:
+      API_INTERNAL_URL: http://api:8080
+    depends_on: [api]
+    ports: ["3000:3000"]
+
+volumes:
+  pgdata:
+  assets:
